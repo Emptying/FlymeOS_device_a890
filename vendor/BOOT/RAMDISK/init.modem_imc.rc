@@ -1,0 +1,32 @@
+# Copyright (c) 2012 NVIDIA Corporation.  All Rights Reserved.
+#
+# NVIDIA Corporation and its licensors retain all intellectual property and
+# proprietary rights in and to this software and related documentation.  Any
+# use, reproduction, disclosure or distribution of this software and related
+# documentation without an express license agreement from NVIDIA Corporation
+# is strictly prohibited.
+
+on init
+    setprop rild.libpath /system/lib/libril-xiaomi-imc.so
+    setprop rild.libargs ""
+    setprop ril.ecclist "112,000,08,110,118,119,911,999,120,122"
+    setprop persist.radio.modem "WCDMA"
+
+service mux-daemon /system/bin/gsm0710muxd -s /dev/ttyACM0 -v 3 -n 8 -m basic
+    class main
+    user root
+    group radio cache inet misc audio log
+    disabled
+
+service nvm-server /system/bin/nvm_server
+    class main
+    socket nvm-ctl stream 660 radio radio
+    user root
+    group root radio
+    oneshot
+
+#Start imc modem fild here
+service fil-daemon /system/bin/imc_fild
+    class main
+    user root
+    group root radio

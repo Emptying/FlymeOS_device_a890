@@ -1,0 +1,51 @@
+# Copyright (c) 2012 NVIDIA Corporation.  All Rights Reserved.
+#
+# NVIDIA Corporation and its licensors retain all intellectual property and
+# proprietary rights in and to this software and related documentation.  Any
+# use, reproduction, disclosure or distribution of this software and related
+# documentation without an express license agreement from NVIDIA Corporation
+# is strictly prohibited.
+
+on init
+    setprop rild.libpath /system/lib/libril-xiaomi-sprd.so
+    setprop rild.libargs "-r ts0710mux10 -r ts0710mux11 -r ts0710mux4"
+    setprop mdm.diag_path /sdcard/offline_log/
+    setprop mdm.diag_port /dev/ttyHS0
+    setprop ril.ecclist "112,000,08,110,118,119,911,999,120,122"
+    setprop persist.radio.modem "TD"
+
+    chown root radio /sys/class/spi_master/spi0/spi0.0/reset
+    chown root radio /sys/class/spi_master/spi0/spi0.0/assert
+
+service fil-daemon /system/bin/fild
+  class main
+  user root
+  group root radio
+
+on property:persist.mdm.offline_log.enable=true
+    write /sys/class/spi_master/spi0/spi0.0/offline_log 1
+
+on property:persist.mdm.offline_log.enable=false
+    write /sys/class/spi_master/spi0/spi0.0/offline_log 0
+
+on property:sys.usb.config=diag
+    write /sys/class/spi_master/spi0/spi0.0/usb_switch 1
+    setprop sys.usb.state ${sys.usb.config}
+
+on property:sys.usb.config=mtp
+    write /sys/class/spi_master/spi0/spi0.0/usb_switch 0
+
+on property:sys.usb.config=mtp,adb
+    write /sys/class/spi_master/spi0/spi0.0/usb_switch 0
+
+on property:sys.usb.config=rndis
+    write /sys/class/spi_master/spi0/spi0.0/usb_switch 0
+
+on property:sys.usb.config=rndis,adb
+    write /sys/class/spi_master/spi0/spi0.0/usb_switch 0
+
+on property:sys.usb.config=ptp
+    write /sys/class/spi_master/spi0/spi0.0/usb_switch 0
+
+on property:sys.usb.config=ptp,adb
+    write /sys/class/spi_master/spi0/spi0.0/usb_switch 0
